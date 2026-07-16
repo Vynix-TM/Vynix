@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Join Vynix</title>
+<link rel="icon" href="assets/vynixS.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header>
+  <nav>
+    <a class="brand" href="index.html">
+      <img src="assets/vynixS.png" alt="Vynix icon">
+      <span>VYNIX</span>
+    </a>
+    <div class="navlinks">
+      <a href="index.html#crafts">Crafts</a>
+      <a href="index.html#leaders">Leadership</a>
+      <span class="nav-user" id="navUser"></span>
+    </div>
+  </nav>
+</header>
+
+<main>
+  <div class="page-head">
+    <div class="eyebrow" style="justify-content:center;display:flex;">JOIN THE TEAM</div>
+    <h1>Tell us what you build</h1>
+    <p>A few details about you and what you bring — the leaders will review it and get back to you.</p>
+  </div>
+
+  <div class="wrap-narrow" style="padding-bottom:100px;">
+
+    <!-- Shown while we check auth state -->
+    <div id="checkingState" class="card" style="text-align:center;">
+      <span class="spinner"></span>
+      <p style="margin-top:14px;color:var(--slate);font-family:var(--font-mono);font-size:0.85rem;">Checking your session…</p>
+    </div>
+
+    <!-- Shown if the user already has a request -->
+    <div id="alreadyState" class="card" style="display:none;">
+      <div class="request-summary">
+        <h3>You've already applied</h3>
+        <p class="meta">You can only submit one request at a time. Check its status from your account.</p>
+        <div id="existingStatus"></div>
+        <a href="signin.html" class="btn btn-ghost btn-block">View my status</a>
+      </div>
+    </div>
+
+    <!-- The actual form -->
+    <form id="joinForm" class="card form-grid" style="display:none;">
+      <div id="formMessage" class="form-message"></div>
+
+      <div class="field">
+        <label for="fullName">Full name</label>
+        <input type="text" id="fullName" name="fullName" placeholder="Your full name" required>
+      </div>
+
+      <div class="field">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" placeholder="you@example.com" required>
+      </div>
+
+      <div class="field">
+        <label for="role">Role / type</label>
+        <select id="role" name="role" required>
+          <option value="" disabled selected>Select a role</option>
+          <option value="games-dev">Games dev</option>
+          <option value="photo-editor">Photo editor</option>
+          <option value="html-sites-creator">HTML / sites creator</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="experience">Experience</label>
+        <textarea id="experience" name="experience" placeholder="How long have you been doing this? Any projects worth mentioning?" required></textarea>
+      </div>
+
+      <div class="field">
+        <label for="skills">Skills — what can you do?</label>
+        <textarea id="skills" name="skills" placeholder="Tools, languages, engines, software you're comfortable with…" required></textarea>
+      </div>
+
+      <div class="field">
+        <label for="message">Short message</label>
+        <textarea id="message" name="message" placeholder="Anything else you'd like the leaders to know?"></textarea>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-block" id="submitBtn">Submit request</button>
+    </form>
+
+    <!-- Shown right after a successful submit -->
+    <div id="successState" class="card" style="display:none;text-align:center;">
+      <div class="status-badge pending" style="margin-bottom:16px;">Pending review</div>
+      <h3 style="font-family:var(--font-display);font-size:1.2rem;margin-bottom:10px;">Request sent</h3>
+      <p style="color:var(--slate);font-size:0.9rem;margin-bottom:22px;">The leaders will review it soon. You can check the status any time from your account.</p>
+      <a href="signin.html" class="btn btn-primary btn-block">Go to my account</a>
+    </div>
+
+  </div>
+</main>
+
+<footer>
+  <div class="foot-inner">
+    <div class="brand"><img src="assets/vynixS.png" alt="Vynix icon"></div>
+    <p>© 2026 VYNIX — WORLDS · CODE · FRAMES</p>
+  </div>
+</footer>
+
+<script type="module">
+  import { watchAuth, submitJoinRequest, listenMyRequests } from "./app.js";
+
+  const checkingState = document.getElementById("checkingState");
+  const alreadyState = document.getElementById("alreadyState");
+  const joinForm = document.getElementById("joinForm");
+  const successState = document.getElementById("successState");
+  const formMessage = document.getElementById("formMessage");
+  const submitBtn = document.getElementById("submitBtn");
+  const navUser = document.getElementById("navUser");
+  const existingStatus = document.getElementById("existingStatus");
+
+  function showMessage(text, type) {
+    formMessage.textContent = text;
+    formMessage.className = "form-message show " + type;
+  }
+
+  let currentUser = null;
+  let unsubRequests = null;
+
+  watchAuth((user) => {
+    currentUser = user;
+
+    if (!user) {
+      // Not signed in — send them to sign in first, then bounce back here.
+      window.location.href = "signin.html?redirect=join.html";
+      return;
+    }
+
+    navUser.textContent = user.email || "";
+
+    if (unsubRequests) unsubRequests();
+    unsubRequests = listenMyRequests(user.uid, (requests) => {
+      checkingState.style.display = "none";
+
+      const openRequest = requests.find(r => r.status === "pending" || r.status === "accepted");
+
+      if (openRequest) {
+        alreadyState.style.display = "block";
+        joinForm.style.display = "none";
+        const badgeClass = openRequest.status === "accepted" ? "accepted" : "pending";
+        const label = openRequest.status === "accepted" ? "Accepted" : "Pending review";
+        existingStatus.innerHTML = `<div class="status-badge ${badgeClass}">${label}</div>`;
+      } else {
+        alreadyState.style.display = "none";
+        joinForm.style.display = "grid";
+        // pre-fill email from the signed-in account
+        document.getElementById("email").value = user.email || "";
+      }
+    }, (err) => {
+      checkingState.innerHTML = `<div class="form-message show error">
+        Couldn't check your request status: ${err.code || err.message || "unknown error"}.
+        Open the browser console for the full error — it's usually missing Firestore rules
+        or a missing composite index (Firestore gives you a direct link to create one).
+      </div>`;
+    });
+  });
+
+  joinForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    if (!currentUser) return;
+
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="spinner"></span> Submitting…';
+
+    const data = {
+      fullName: document.getElementById("fullName").value.trim(),
+      email: document.getElementById("email").value.trim(),
+      role: document.getElementById("role").value,
+      experience: document.getElementById("experience").value.trim(),
+      skills: document.getElementById("skills").value.trim(),
+      message: document.getElementById("message").value.trim(),
+    };
+
+    if (!data.fullName || !data.email || !data.role || !data.experience || !data.skills) {
+      showMessage("Please fill in all required fields.", "error");
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Submit request";
+      return;
+    }
+
+    try {
+      await submitJoinRequest(currentUser, data);
+      joinForm.style.display = "none";
+      successState.style.display = "block";
+    } catch (err) {
+      showMessage(err.message || "Couldn't submit your request. Please try again.", "error");
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Submit request";
+    }
+  });
+</script>
+</body>
+</html>

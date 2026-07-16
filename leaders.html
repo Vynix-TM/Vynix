@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Leader access — Vynix</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="assets/vynixS.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header>
+  <nav>
+    <a class="brand" href="index.html">
+      <img src="assets/vynixS.png" alt="Vynix icon">
+      <span>VYNIX</span>
+    </a>
+    <div class="navlinks">
+      <span class="nav-user" id="navUser"></span>
+      <a href="#" id="leaderSignOut" style="display:none;">Sign out</a>
+    </div>
+  </nav>
+</header>
+
+<main>
+
+  <div id="gateView" class="gate-wrap">
+    <div class="card gate-card">
+      <div class="lock-icon">🔒</div>
+      <h1>Leader access</h1>
+      <p>This area is restricted. Enter the access code to continue.</p>
+      <form id="gateForm" class="form-grid">
+        <div id="gateMessage" class="form-message"></div>
+        <div class="field">
+          <input type="password" id="gateCode" placeholder="Access code" autocomplete="off" required>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">Unlock</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="signInPromptView" class="gate-wrap" style="display:none;">
+    <div class="card gate-card">
+      <div class="lock-icon">👤</div>
+      <h1>Sign in required</h1>
+      <p>Sign in with your leader account to open the dashboard.</p>
+      <a href="signin.html?redirect=leader.html" class="btn btn-primary btn-block">Sign in</a>
+    </div>
+  </div>
+
+  <div id="deniedView" class="gate-wrap" style="display:none;">
+    <div class="card gate-card">
+      <div class="lock-icon">⛔</div>
+      <h1>Access denied</h1>
+      <p>This account isn't recognized as a Vynix leader.</p>
+      <a href="index.html" class="btn btn-ghost btn-block">Back to home</a>
+    </div>
+  </div>
+
+  <div id="dashboardView" style="display:none;">
+    <div class="page-head">
+      <div class="eyebrow" style="justify-content:center;display:flex;">LEADER DASHBOARD</div>
+      <h1>Requests &amp; inquiries</h1>
+      <p>Review who wants in, and who wants a site built.</p>
+    </div>
+
+    <div class="wrap" style="padding-bottom:100px;">
+      <div class="auth-tabs" style="max-width:520px;margin:0 auto 40px;">
+        <button type="button" class="auth-tab active" id="tabRequests">Join requests</button>
+        <button type="button" class="auth-tab" id="tabInquiries">Client inquiries</button>
+        <button type="button" class="auth-tab" id="tabMessages">Messages</button>
+      </div>
+
+      <div id="requestsPanel">
+        <div class="dash-stats">
+          <div class="stat"><div class="num" id="statTotal">–</div><div class="lbl">Total</div></div>
+          <div class="stat"><div class="num" id="statPending">–</div><div class="lbl">Pending</div></div>
+          <div class="stat"><div class="num" id="statAccepted">–</div><div class="lbl">Accepted</div></div>
+          <div class="stat"><div class="num" id="statDeclined">–</div><div class="lbl">Declined</div></div>
+        </div>
+
+        <div class="filter-row">
+          <button class="filter-chip active" data-filter="all">All</button>
+          <button class="filter-chip" data-filter="pending">Pending</button>
+          <button class="filter-chip" data-filter="accepted">Accepted</button>
+          <button class="filter-chip" data-filter="declined">Declined</button>
+        </div>
+
+        <div id="requestList" class="request-list"></div>
+      </div>
+
+      <div id="inquiriesPanel" style="display:none;">
+        <div class="dash-stats">
+          <div class="stat"><div class="num" id="statInqTotal">–</div><div class="lbl">Total</div></div>
+          <div class="stat"><div class="num" id="statInqNew">–</div><div class="lbl">New</div></div>
+          <div class="stat"><div class="num" id="statInqContacted">–</div><div class="lbl">Contacted</div></div>
+          <div class="stat"><div class="num" id="statInqClosed">–</div><div class="lbl">Closed</div></div>
+        </div>
+
+        <div class="filter-row">
+          <button class="filter-chip active" data-ifilter="all">All</button>
+          <button class="filter-chip" data-ifilter="new">New</button>
+          <button class="filter-chip" data-ifilter="contacted">Contacted</button>
+          <button class="filter-chip" data-ifilter="closed">Closed</button>
+        </div>
+
+        <div id="inquiryList" class="request-list"></div>
+      </div>
+
+      <div id="messagesPanel" style="display:none;">
+        <div class="inbox-grid">
+          <div class="inbox-list" id="conversationList"></div>
+          <div class="inbox-thread" id="threadPane">
+            <div class="chat-body"><div class="empty-chat">Select a conversation from the list.</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <div class="foot-inner">
+    <div class="brand"><img src="assets/vynixS.png" alt="Vynix icon"></div>
+    <p>© 2026 VYNIX — WORLDS · CODE · FRAMES</p>
+  </div>
+</footer>
+
+<script type="module">
+  import {
+    watchAuth, isLeaderEmail, listenAllRequests, updateRequestStatus,
+    listenAllInquiries, updateInquiryStatus,
+    listenAllConversations, listenMessages, sendMessage, uploadChatImage,
+    LEADER_ACCESS_CODE, signOutUser
+  } from "./app.js";
+
+  const gateView = document.getElementById("gateView");
+  const signInPromptView = document.getElementById("signInPromptView");
+  const deniedView = document.getElementById("deniedView");
+  const dashboardView = document.getElementById("dashboardView");
+  const gateForm = document.getElementById("gateForm");
+  const gateMessage = document.getElementById("gateMessage");
+  const navUser = document.getElementById("navUser");
+  const requestList = document.getElementById("requestList");
+
+  const statTotal = document.getElementById("statTotal");
+  const statPending = document.getElementById("statPending");
+  const statAccepted = document.getElementById("statAccepted");
+  const statDeclined = document.getElementById("statDeclined");
+
+  const SESSION_KEY = "vynix_leader_gate_ok";
+  let allRequests = [];
+  let currentFilter = "all";
+  let currentLeaderUser = null;
+
+  function hideAll() {
+    [gateView, signInPromptView, deniedView, dashboardView].forEach(v => v.style.display = "none");
+  }
+
+  gateForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const val = document.getElementById("gateCode").value.trim();
+    if (val === LEADER_ACCESS_CODE) {
+      sessionStorage.setItem(SESSION_KEY, "1");
+      checkAccess();
+    } else {
+      gateMessage.textContent = "Incorrect code.";
+      gateMessage.className = "form-message show error";
+    }
+  });
+
+  function checkAccess() {
+    const codeOk = sessionStorage.getItem(SESSION_KEY) === "1";
+    hideAll();
+
+    if (!codeOk) {
+      gateView.style.display = "flex";
+      return;
+    }
+
+    watchAuth(async (user) => {
+      if (!user) {
+        hideAll();
+        signInPromptView.style.display = "flex";
+        return;
+      }
+
+      navUser.textContent = user.email || "";
+      document.getElementById("leaderSignOut").style.display = "inline";
+      currentLeaderUser = user;
+
+      const leader = isLeaderEmail(user.email);
+
+      hideAll();
+      if (!leader) {
+        deniedView.style.display = "flex";
+        return;
+      }
+
+      dashboardView.style.display = "block";
+      startDashboard();
+    });
+  }
+
+  let unsubAll = null;
+  let unsubInquiries = null;
+  let unsubConversations = null;
+  function startDashboard() {
+    if (unsubAll) return; // already listening
+    unsubAll = listenAllRequests((requests) => {
+      allRequests = requests;
+      renderStats();
+      renderList();
+    }, (err) => {
+      requestList.innerHTML = `<div class="empty-state">
+        <div class="glyph">⚠️</div>
+        <p>Couldn't load requests. Make sure Firestore rules grant this account leader read access.</p>
+      </div>`;
+    });
+
+    unsubInquiries = listenAllInquiries((inquiries) => {
+      allInquiries = inquiries;
+      renderInquiryStats();
+      renderInquiryList();
+    }, (err) => {
+      inquiryList.innerHTML = `<div class="empty-state">
+        <div class="glyph">⚠️</div>
+        <p>Couldn't load inquiries. Make sure Firestore rules grant this account leader read access.</p>
+      </div>`;
+    });
+
+    unsubConversations = listenAllConversations((conversations) => {
+      allConversations = conversations;
+      renderConversationList();
+    }, (err) => {
+      conversationList.innerHTML = `<div class="empty-state">
+        <div class="glyph">⚠️</div>
+        <p>Couldn't load conversations.</p>
+      </div>`;
+    });
+  }
+
+  const tabRequests = document.getElementById("tabRequests");
+  const tabInquiries = document.getElementById("tabInquiries");
+  const tabMessages = document.getElementById("tabMessages");
+  const requestsPanel = document.getElementById("requestsPanel");
+  const inquiriesPanel = document.getElementById("inquiriesPanel");
+  const messagesPanel = document.getElementById("messagesPanel");
+  const inquiryList = document.getElementById("inquiryList");
+
+  function showPanel(which) {
+    [tabRequests, tabInquiries, tabMessages].forEach(t => t.classList.remove("active"));
+    [requestsPanel, inquiriesPanel, messagesPanel].forEach(p => p.style.display = "none");
+    if (which === "requests") { tabRequests.classList.add("active"); requestsPanel.style.display = "block"; }
+    if (which === "inquiries") { tabInquiries.classList.add("active"); inquiriesPanel.style.display = "block"; }
+    if (which === "messages") { tabMessages.classList.add("active"); messagesPanel.style.display = "block"; }
+  }
+  tabRequests.addEventListener("click", () => showPanel("requests"));
+  tabInquiries.addEventListener("click", () => showPanel("inquiries"));
+  tabMessages.addEventListener("click", () => showPanel("messages"));
+
+  let allInquiries = [];
+  let currentInquiryFilter = "all";
+
+  const statInqTotal = document.getElementById("statInqTotal");
+  const statInqNew = document.getElementById("statInqNew");
+  const statInqContacted = document.getElementById("statInqContacted");
+  const statInqClosed = document.getElementById("statInqClosed");
+
+  function renderInquiryStats() {
+    statInqTotal.textContent = allInquiries.length;
+    statInqNew.textContent = allInquiries.filter(i => i.status === "new").length;
+    statInqContacted.textContent = allInquiries.filter(i => i.status === "contacted").length;
+    statInqClosed.textContent = allInquiries.filter(i => i.status === "closed").length;
+  }
+
+  document.querySelectorAll("[data-ifilter]").forEach(chip => {
+    chip.addEventListener("click", () => {
+      document.querySelectorAll("[data-ifilter]").forEach(c => c.classList.remove("active"));
+      chip.classList.add("active");
+      currentInquiryFilter = chip.dataset.ifilter;
+      renderInquiryList();
+    });
+  });
+
+  function projectTypeLabel(t) {
+    return {
+      "landing-page": "Single landing page",
+      "business-site": "Multi-page business site",
+      "ecommerce": "Online store",
+      "web-app": "Web app / custom",
+      "redesign": "Redesign",
+      "other": "Other",
+    }[t] || t;
+  }
+
+  function renderInquiryList() {
+    const items = currentInquiryFilter === "all" ? allInquiries : allInquiries.filter(i => i.status === currentInquiryFilter);
+
+    if (!items.length) {
+      inquiryList.innerHTML = `<div class="empty-state">
+        <div class="glyph">📭</div>
+        <p>No inquiries here.</p>
+      </div>`;
+      return;
+    }
+
+    inquiryList.innerHTML = items.map(i => `
+      <div class="request-card" data-id="${i.id}">
+        <div class="rc-top">
+          <div>
+            <div class="rc-name">${escapeHtml(i.name)} <span style="color:var(--slate-dim);font-weight:400;">— ${escapeHtml(i.business)}</span></div>
+            <div class="rc-email">${escapeHtml(i.email)}</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span class="rc-role">${escapeHtml(projectTypeLabel(i.projectType))}</span>
+            <span class="status-badge ${i.status}">${escapeHtml(i.status)}</span>
+          </div>
+        </div>
+        <div class="rc-body">
+          <div><strong>Budget</strong>${escapeHtml(i.budget)}</div>
+          <div><strong>Timeline</strong>${escapeHtml(i.timeline)}</div>
+          <div><strong>Message</strong>${escapeHtml(i.message)}</div>
+        </div>
+        <div class="rc-actions">
+          <button class="btn btn-accept" data-iaction="contacted" data-id="${i.id}" ${i.status === "contacted" ? "disabled" : ""}>Mark contacted</button>
+          <button class="btn btn-ghost" data-iaction="closed" data-id="${i.id}" ${i.status === "closed" ? "disabled" : ""}>Close</button>
+        </div>
+      </div>
+    `).join("");
+
+    inquiryList.querySelectorAll("[data-iaction]").forEach(btn => {
+      btn.addEventListener("click", async () => {
+        btn.disabled = true;
+        try {
+          await updateInquiryStatus(btn.dataset.id, btn.dataset.iaction);
+        } catch (err) {
+          alert("Couldn't update this inquiry: " + (err.message || err));
+          btn.disabled = false;
+        }
+      });
+    });
+  }
+
+  const conversationList = document.getElementById("conversationList");
+  const threadPane = document.getElementById("threadPane");
+  let allConversations = [];
+  let activeConversationId = null;
+  let unsubThreadMessages = null;
+
+  function timeAgo(ts) {
+    if (!ts || !ts.toDate) return "";
+    const diffMs = Date.now() - ts.toDate().getTime();
+    const mins = Math.round(diffMs / 60000);
+    if (mins < 1) return "just now";
+    if (mins < 60) return mins + "m ago";
+    const hrs = Math.round(mins / 60);
+    if (hrs < 24) return hrs + "h ago";
+    return Math.round(hrs / 24) + "d ago";
+  }
+
+  function renderConversationList() {
+    if (!allConversations.length) {
+      conversationList.innerHTML = `<div class="empty-state" style="padding:30px 16px;"><p>No conversations yet.</p></div>`;
+      return;
+    }
+    conversationList.innerHTML = allConversations.map(c => `
+      <div class="inbox-item ${c.id === activeConversationId ? "active" : ""}" data-cid="${c.id}">
+        <div class="iname">${escapeHtml(c.clientName || "Visitor")}</div>
+        <div class="ipreview">${escapeHtml(c.lastMessage || "")}</div>
+        <div class="ipreview" style="font-family:var(--font-mono);font-size:0.68rem;margin-top:6px;">${timeAgo(c.lastMessageAt)}</div>
+      </div>
+    `).join("");
+
+    conversationList.querySelectorAll("[data-cid]").forEach(el => {
+      el.addEventListener("click", () => openThread(el.dataset.cid));
+    });
+  }
+
+  function openThread(conversationId) {
+    activeConversationId = conversationId;
+    renderConversationList();
+    const conv = allConversations.find(c => c.id === conversationId);
+
+    threadPane.innerHTML = `
+      <div class="inbox-thread-head">
+        <div class="tname">${escapeHtml(conv?.clientName || "Visitor")}</div>
+        <div class="temail">${escapeHtml(conv?.clientEmail || "")}</div>
+      </div>
+      <div class="chat-body" id="threadBody"><div class="empty-chat">Loading…</div></div>
+      <div class="chat-input-row">
+        <input type="file" id="threadImageInput" accept="image/*" style="display:none;">
+        <button type="button" class="icon-btn" id="threadAttachBtn" title="Send an image">📷</button>
+        <input type="text" id="threadInput" placeholder="Reply…">
+        <button type="button" class="send-btn" id="threadSendBtn" title="Send">➤</button>
+      </div>
+    `;
+
+    const threadBody = document.getElementById("threadBody");
+    const threadInput = document.getElementById("threadInput");
+    const threadSendBtn = document.getElementById("threadSendBtn");
+    const threadAttachBtn = document.getElementById("threadAttachBtn");
+    const threadImageInput = document.getElementById("threadImageInput");
+
+    if (unsubThreadMessages) unsubThreadMessages();
+    unsubThreadMessages = listenMessages(conversationId, (messages) => {
+      threadBody.innerHTML = messages.map(m => {
+        const isClient = m.senderType === "client";
+        const label = isClient ? (conv?.clientName || "Visitor") : "You (Vynix)";
+        const body = m.type === "image" && m.imageUrl
+          ? `<img src="${escapeHtml(m.imageUrl)}" alt="Shared image">`
+          : escapeHtml(m.text);
+        return `<div class="bubble ${isClient ? "leader" : "client"}">
+          <div class="sender">${escapeHtml(label)}</div>
+          ${body}
+        </div>`;
+      }).join("");
+      threadBody.scrollTop = threadBody.scrollHeight;
+    }, (err) => {
+      threadBody.innerHTML = `<div class="empty-chat">Couldn't load messages: ${err.code || err.message}</div>`;
+    });
+
+    async function sendReply() {
+      const text = threadInput.value.trim();
+      if (!text || !currentLeaderUser) return;
+      threadInput.value = "";
+      try {
+        await sendMessage(conversationId, currentLeaderUser.uid, "leader", currentLeaderUser.email, { text });
+      } catch (err) {
+        alert("Couldn't send: " + (err.message || err));
+      }
+    }
+    threadSendBtn.addEventListener("click", sendReply);
+    threadInput.addEventListener("keydown", (e) => { if (e.key === "Enter") sendReply(); });
+
+    threadAttachBtn.addEventListener("click", () => threadImageInput.click());
+    threadImageInput.addEventListener("change", async () => {
+      const file = threadImageInput.files[0];
+      if (!file || !currentLeaderUser) return;
+      threadAttachBtn.disabled = true;
+      try {
+        const url = await uploadChatImage(conversationId, file);
+        await sendMessage(conversationId, currentLeaderUser.uid, "leader", currentLeaderUser.email, { imageUrl: url });
+      } catch (err) {
+        alert("Couldn't send image: " + (err.message || err));
+      } finally {
+        threadAttachBtn.disabled = false;
+        threadImageInput.value = "";
+      }
+    });
+  }
+
+  function renderStats() {
+    statTotal.textContent = allRequests.length;
+    statPending.textContent = allRequests.filter(r => r.status === "pending").length;
+    statAccepted.textContent = allRequests.filter(r => r.status === "accepted").length;
+    statDeclined.textContent = allRequests.filter(r => r.status === "declined").length;
+  }
+
+  document.querySelectorAll(".filter-chip").forEach(chip => {
+    chip.addEventListener("click", () => {
+      document.querySelectorAll(".filter-chip").forEach(c => c.classList.remove("active"));
+      chip.classList.add("active");
+      currentFilter = chip.dataset.filter;
+      renderList();
+    });
+  });
+
+  function roleLabel(role) {
+    return { "games-dev": "Games dev", "photo-editor": "Photo editor", "html-sites-creator": "HTML / sites creator" }[role] || role;
+  }
+  function escapeHtml(str) {
+    const d = document.createElement("div");
+    d.textContent = str || "";
+    return d.innerHTML;
+  }
+
+  function renderList() {
+    const items = currentFilter === "all" ? allRequests : allRequests.filter(r => r.status === currentFilter);
+
+    if (!items.length) {
+      requestList.innerHTML = `<div class="empty-state">
+        <div class="glyph">📭</div>
+        <p>No requests here.</p>
+      </div>`;
+      return;
+    }
+
+    requestList.innerHTML = items.map(r => `
+      <div class="request-card" data-id="${r.id}">
+        <div class="rc-top">
+          <div>
+            <div class="rc-name">${escapeHtml(r.fullName)}</div>
+            <div class="rc-email">${escapeHtml(r.email)}</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <span class="rc-role">${escapeHtml(roleLabel(r.role))}</span>
+            <span class="status-badge ${r.status}">${escapeHtml(r.status)}</span>
+          </div>
+        </div>
+        <div class="rc-body">
+          <div><strong>Experience</strong>${escapeHtml(r.experience)}</div>
+          <div><strong>Skills</strong>${escapeHtml(r.skills)}</div>
+          ${r.message ? `<div><strong>Message</strong>${escapeHtml(r.message)}</div>` : ""}
+        </div>
+        <div class="rc-actions">
+          <button class="btn btn-accept" data-action="accepted" data-id="${r.id}" ${r.status === "accepted" ? "disabled" : ""}>Accept</button>
+          <button class="btn btn-decline" data-action="declined" data-id="${r.id}" ${r.status === "declined" ? "disabled" : ""}>Decline</button>
+        </div>
+      </div>
+    `).join("");
+
+    requestList.querySelectorAll("[data-action]").forEach(btn => {
+      btn.addEventListener("click", async () => {
+        btn.disabled = true;
+        try {
+          await updateRequestStatus(btn.dataset.id, btn.dataset.action);
+        } catch (err) {
+          alert("Couldn't update this request: " + (err.message || err));
+          btn.disabled = false;
+        }
+      });
+    });
+  }
+
+  document.getElementById("leaderSignOut").addEventListener("click", (e) => {
+    e.preventDefault();
+    signOutUser();
+  });
+
+  checkAccess();
+</script>
+</body>
+</html>

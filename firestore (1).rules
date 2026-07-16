@@ -1,0 +1,58 @@
+rules_version = '2';
+
+// Paste this into Firebase console → Firestore Database → Rules.
+// This is what actually enforces access control — the "secret code"
+// on leader.html is just a UX gate, not real security.
+//
+// NOTE: if you don't actually use a `users` / `conversations` /
+// `messages` schema anywhere else in this project, you can delete
+// that whole block below — it isn't part of the Vynix join flow and
+// looks like leftover boilerplate from a different project/template.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // teamRequests/{requestId}
+    match /teamRequests/{requestId} {
+
+      // Anyone signed in can create a request, but only for themselves,
+      // and it must start out pending.
+      allow create: if request.auth != null
+                    && request.resource.data.uid == request.auth.uid
+                    && request.resource.data.status == "pending";
+
+      // A user can read their own request(s). A leader can read all of them.
+      allow read: if request.auth != null
+                  && (resource.data.uid == request.auth.uid
+                      || exists(/databases/$(database)/documents/leaders/$(request.auth.uid)));
+
+      // Only leaders can update a request (e.g. accept / decline).
+      allow update: if request.auth != null
+                    && exists(/databases/$(database)/documents/leaders/$(request.auth.uid));
+
+      allow delete: if false;
+    }
+
+    // leaders/{uid}  — one empty doc per leader, doc ID = their Firebase Auth UID.
+    // Managed by hand in the console — nobody can write to it from the app.
+    match /leaders/{leaderId} {
+      allow read: if request.auth != null;
+      allow write: if false;
+    }
+
+    // ---- Unrelated to Vynix's join flow — kept from your existing rules ----
+    match /users/{uid} {
+      allow read: if request.auth != null;
+      allow create, update, delete: if request.auth.uid == uid;
+    }
+
+    match /conversations/{conversationId} {
+      allow read, write: if request.auth.uid in resource.data.participants;
+
+      match /messages/{messageId} {
+        allow read, write: if request.auth.uid in get(/databases/$(database)/documents/conversations/$(conversationId)).data.participants;
+        allow create: if request.auth != null && request.resource.data.senderId == request.auth.uid;
+      }
+    }
+  }
+}

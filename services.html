@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vynix — Websites for Business</title>
+<link rel="icon" href="assets/vynixS.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<style>
+  .plans{ display:grid; grid-template-columns:repeat(3, 1fr); gap:28px; }
+  @media(max-width:900px){ .plans{ grid-template-columns:1fr; max-width:420px; margin:0 auto; } }
+  .plan{
+    background:var(--bg-raised); border:1px solid var(--line); border-radius:14px;
+    padding:32px 28px; display:flex; flex-direction:column; position:relative;
+  }
+  .plan.featured{ border-color:var(--cyan); box-shadow:0 0 0 1px var(--cyan), 0 20px 50px rgba(0,217,255,0.08); }
+  .plan .badge{
+    position:absolute; top:-13px; left:28px; background:linear-gradient(90deg, var(--violet), var(--cyan));
+    color:#050714; font-family:var(--font-mono); font-size:0.68rem; letter-spacing:0.08em;
+    padding:5px 12px; border-radius:999px; font-weight:700; text-transform:uppercase;
+  }
+  .plan .plan-name{ font-family:var(--font-display); font-size:1.15rem; font-weight:600; margin-bottom:6px; }
+  .plan .plan-desc{ color:var(--slate); font-size:0.85rem; margin-bottom:20px; min-height:40px; }
+  .plan .plan-price{ font-family:var(--font-display); font-size:2rem; font-weight:700; margin-bottom:2px; }
+  .plan .plan-price span{ font-family:var(--font-mono); font-size:0.75rem; color:var(--slate); font-weight:400; }
+  .plan ul{ list-style:none; margin:22px 0 28px; display:flex; flex-direction:column; gap:11px; }
+  .plan li{ font-size:0.87rem; color:#c6d0f0; display:flex; gap:10px; align-items:flex-start; }
+  .plan li::before{ content:"◆"; color:var(--cyan); font-size:0.6rem; margin-top:5px; }
+  .plan .btn{ margin-top:auto; }
+
+  .steps{ display:grid; grid-template-columns:repeat(4, 1fr); gap:24px; }
+  @media(max-width:800px){ .steps{ grid-template-columns:1fr 1fr; } }
+  .step{ text-align:center; }
+  .step .num{
+    width:44px; height:44px; margin:0 auto 16px; border-radius:50%;
+    border:1px solid var(--line); display:flex; align-items:center; justify-content:center;
+    font-family:var(--font-display); font-weight:700; color:var(--cyan);
+  }
+  .step h4{ font-family:var(--font-display); font-size:1rem; margin-bottom:8px; }
+  .step p{ color:var(--slate); font-size:0.82rem; }
+
+  .price-note{ text-align:center; color:var(--slate-dim); font-family:var(--font-mono); font-size:0.78rem; margin-top:36px; }
+
+  .pay-methods{ display:flex; gap:16px; justify-content:center; flex-wrap:wrap; }
+  .pay-chip{
+    display:flex; align-items:center; gap:10px; background:var(--bg-raised); border:1px solid var(--line);
+    border-radius:10px; padding:14px 22px; font-family:var(--font-mono); font-size:0.85rem;
+  }
+  .pay-chip .dot{ width:8px; height:8px; border-radius:50%; background:var(--green); }
+  .pay-chip.soon{ opacity:0.55; }
+  .pay-chip.soon .dot{ background:var(--slate-dim); }
+  .pay-chip .soon-tag{ font-size:0.68rem; color:var(--slate-dim); letter-spacing:0.06em; }
+</style>
+</head>
+<body>
+
+<header>
+  <nav>
+    <a class="brand" href="index.html">
+      <img src="assets/vynixS.png" alt="Vynix icon">
+      <span>VYNIX</span>
+    </a>
+    <div class="navlinks">
+      <a href="index.html#crafts">Crafts</a>
+      <a href="#plans">Pricing</a>
+      <a href="messages.html">Chat with us</a>
+      <a href="#inquiry" class="nav-cta">Get a quote</a>
+    </div>
+  </nav>
+</header>
+
+<main>
+  <section class="hero" style="padding-top:100px;">
+    <div class="wrap">
+      <div class="eyebrow">VYNIX FOR BUSINESS</div>
+      <h1>A website for your business, built by people who actually build things.</h1>
+      <p class="sub">From a simple landing page to a full multi-page site — Vynix designs, builds, and ships it for you.</p>
+      <div class="cta-row">
+        <a href="#inquiry" class="btn btn-primary">Get a free quote</a>
+        <a href="#plans" class="btn btn-ghost">See pricing</a>
+      </div>
+    </div>
+  </section>
+
+  <section id="plans">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="eyebrow">PRICING</div>
+        <h2>Pick a starting point</h2>
+        <p>Every project is scoped to what you actually need — these are starting points, not fixed menus. Exact quote comes after we hear about your business.</p>
+      </div>
+
+      <div class="plans">
+        <div class="plan">
+          <div class="plan-name">Starter</div>
+          <div class="plan-desc">A single, polished page to get a business online fast.</div>
+          <div class="plan-price">5 000<span> DA</span></div>
+          <ul>
+            <li>One-page site (home, about, contact)</li>
+            <li>Mobile-friendly design</li>
+            <li>Contact form</li>
+            <li>Basic on-page SEO</li>
+            <li>1 round of revisions</li>
+            <li>You provide the domain — we host it for you</li>
+          </ul>
+          <a href="#inquiry" class="btn btn-ghost btn-block">Start here</a>
+        </div>
+
+        <div class="plan featured">
+          <div class="badge">Most popular</div>
+          <div class="plan-name">Business</div>
+          <div class="plan-desc">A full multi-page site for a business that wants to look established.</div>
+          <div class="plan-price">40 000<span> DA+</span></div>
+          <ul>
+            <li>Up to 5 pages (home, about, services, contact, +1)</li>
+            <li>Custom design matched to your brand</li>
+            <li>Contact / booking form</li>
+            <li>SEO setup + basic analytics</li>
+            <li>2 rounds of revisions</li>
+            <li>30 days of post-launch support</li>
+            <li>You provide the domain — we host it for you</li>
+          </ul>
+          <a href="#inquiry" class="btn btn-primary btn-block">Start here</a>
+        </div>
+
+        <div class="plan">
+          <div class="plan-name">Custom</div>
+          <div class="plan-desc">E-commerce, web apps, or anything beyond a standard site — you tell us exactly what you need.</div>
+          <div class="plan-price">Custom<span> quote</span></div>
+          <ul>
+            <li>Unlimited pages / custom functionality</li>
+            <li>Online store, bookings, dashboards, etc.</li>
+            <li>Database / backend integration</li>
+            <li>Ongoing maintenance available</li>
+            <li>You provide the domain — we host it for you</li>
+          </ul>
+          <a href="#inquiry" class="btn btn-ghost btn-block">Talk to us</a>
+        </div>
+      </div>
+
+      <p class="price-note">Prices are starting points and will vary with scope. The domain (e.g. .com / .dz) is purchased by you — we handle building and hosting the site on it.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="section-head">
+        <div class="eyebrow">PAYMENT</div>
+        <h2>How you pay</h2>
+        <p>Payment details are worked out with you directly once your quote is confirmed.</p>
+      </div>
+      <div class="pay-methods">
+        <div class="pay-chip"><span class="dot"></span> Flexi</div>
+        <div class="pay-chip"><span class="dot"></span> CCP</div>
+        <div class="pay-chip soon"><span class="dot"></span> Visa <span class="soon-tag">coming soon</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="section-head">
+        <div class="eyebrow">HOW IT WORKS</div>
+        <h2>From idea to live site</h2>
+      </div>
+      <div class="steps">
+        <div class="step">
+          <div class="num">1</div>
+          <h4>Brief</h4>
+          <p>You tell us about your business and what you need — the form below takes two minutes.</p>
+        </div>
+        <div class="step">
+          <div class="num">2</div>
+          <h4>Quote</h4>
+          <p>We come back with a scoped price and timeline based on what you actually need.</p>
+        </div>
+        <div class="step">
+          <div class="num">3</div>
+          <h4>Build</h4>
+          <p>We design and build the site, with revision rounds along the way.</p>
+        </div>
+        <div class="step">
+          <div class="num">4</div>
+          <h4>Launch</h4>
+          <p>Your site goes live, and you get a walkthrough of how to manage it.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="inquiry">
+    <div class="wrap-narrow" style="padding-bottom:40px;">
+      <div class="section-head">
+        <div class="eyebrow">GET A QUOTE</div>
+        <h2>Tell us about your business</h2>
+        <p>No commitment — this just starts the conversation.</p>
+      </div>
+
+      <form id="inquiryForm" class="card form-grid">
+        <div id="formMessage" class="form-message"></div>
+
+        <div class="field">
+          <label for="name">Your name</label>
+          <input type="text" id="name" placeholder="Full name" required>
+        </div>
+
+        <div class="field">
+          <label for="email">Email</label>
+          <input type="email" id="email" placeholder="you@example.com" required>
+        </div>
+
+        <div class="field">
+          <label for="business">Business / company name</label>
+          <input type="text" id="business" placeholder="What's it called?" required>
+        </div>
+
+        <div class="field">
+          <label for="projectType">What do you need?</label>
+          <select id="projectType" required>
+            <option value="" disabled selected>Select a project type</option>
+            <option value="landing-page">Single landing page</option>
+            <option value="business-site">Multi-page business site</option>
+            <option value="ecommerce">Online store</option>
+            <option value="web-app">Web app / custom functionality</option>
+            <option value="redesign">Redesign of an existing site</option>
+            <option value="other">Something else</option>
+          </select>
+        </div>
+
+        <div class="form-row">
+          <div class="field">
+            <label for="budget">Rough budget</label>
+            <select id="budget" required>
+              <option value="" disabled selected>Select a range</option>
+              <option value="under-150">Under $150</option>
+              <option value="150-400">$150 – $400</option>
+              <option value="400-1000">$400 – $1,000</option>
+              <option value="1000-plus">$1,000+</option>
+              <option value="not-sure">Not sure yet</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="timeline">Timeline</label>
+            <select id="timeline" required>
+              <option value="" disabled selected>Select a timeline</option>
+              <option value="asap">As soon as possible</option>
+              <option value="2-4-weeks">2–4 weeks</option>
+              <option value="1-3-months">1–3 months</option>
+              <option value="flexible">Flexible / just exploring</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="message">Tell us about the project</label>
+          <textarea id="message" placeholder="What's the business, what should the site do, any sites you like the look of…" required></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block" id="submitBtn">Send inquiry</button>
+      </form>
+
+      <div id="successState" class="card" style="display:none;text-align:center;">
+        <div class="status-badge accepted" style="margin-bottom:16px;">Sent</div>
+        <h3 style="font-family:var(--font-display);font-size:1.2rem;margin-bottom:10px;">Got it — thanks!</h3>
+        <p style="color:var(--slate);font-size:0.9rem;margin-bottom:22px;">We'll get back to you at the email you gave us with a quote. Want to chat directly, share references, or send images in the meantime?</p>
+        <a href="messages.html" class="btn btn-primary btn-block">Chat with us</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="foot-inner">
+    <div class="brand"><img src="assets/vynixS.png" alt="Vynix icon"></div>
+    <p>© 2026 VYNIX — WORLDS · CODE · FRAMES</p>
+  </div>
+</footer>
+
+<script type="module">
+  import { submitClientInquiry } from "./app.js";
+
+  const form = document.getElementById("inquiryForm");
+  const formMessage = document.getElementById("formMessage");
+  const submitBtn = document.getElementById("submitBtn");
+  const successState = document.getElementById("successState");
+
+  function showMessage(text, type) {
+    formMessage.textContent = text;
+    formMessage.className = "form-message show " + type;
+  }
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="spinner"></span> Sending…';
+
+    const data = {
+      name: document.getElementById("name").value.trim(),
+      email: document.getElementById("email").value.trim(),
+      business: document.getElementById("business").value.trim(),
+      projectType: document.getElementById("projectType").value,
+      budget: document.getElementById("budget").value,
+      timeline: document.getElementById("timeline").value,
+      message: document.getElementById("message").value.trim(),
+    };
+
+    if (!data.name || !data.email || !data.business || !data.projectType || !data.budget || !data.timeline || !data.message) {
+      showMessage("Please fill in all fields.", "error");
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Send inquiry";
+      return;
+    }
+
+    try {
+      await submitClientInquiry(data);
+      form.style.display = "none";
+      successState.style.display = "block";
+    } catch (err) {
+      showMessage(err.message || "Couldn't send — please try again.", "error");
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Send inquiry";
+    }
+  });
+</script>
+</body>
+</html>

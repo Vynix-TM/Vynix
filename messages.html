@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chat with Vynix</title>
+<link rel="icon" href="assets/vynixS.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+<style>
+  .chat-wrap{ max-width:640px; margin:0 auto; padding:100px 24px 60px; }
+  .chat-shell{
+    background:var(--bg-raised); border:1px solid var(--line); border-radius:14px;
+    display:flex; flex-direction:column; height:70vh; overflow:hidden;
+  }
+  .chat-head{ padding:18px 22px; border-bottom:1px solid var(--line); display:flex; align-items:center; gap:12px; }
+  .chat-head img{ height:28px; }
+  .chat-head .title{ font-family:var(--font-display); font-weight:600; }
+  .chat-head .status{ margin-left:auto; font-family:var(--font-mono); font-size:0.72rem; color:var(--green); display:flex; align-items:center; gap:6px; }
+  .chat-head .status::before{ content:""; width:7px; height:7px; border-radius:50%; background:var(--green); }
+</style>
+</head>
+<body>
+
+<header>
+  <nav>
+    <a class="brand" href="index.html">
+      <img src="assets/vynixS.png" alt="Vynix icon">
+      <span>VYNIX</span>
+    </a>
+    <div class="navlinks">
+      <a href="services.html">Services &amp; pricing</a>
+    </div>
+  </nav>
+</header>
+
+<main>
+  <div class="chat-wrap">
+
+    <div id="startView">
+      <div class="page-head" style="padding-top:0;">
+        <div class="eyebrow" style="justify-content:center;display:flex;">CHAT</div>
+        <h1>Talk to Vynix</h1>
+        <p>Tell us who you are and what's on your mind — a leader will reply here.</p>
+      </div>
+
+      <form id="startForm" class="card form-grid">
+        <div id="startMessage" class="form-message"></div>
+        <div class="field">
+          <label for="startName">Your name</label>
+          <input type="text" id="startName" placeholder="Full name" required>
+        </div>
+        <div class="field">
+          <label for="startEmail">Email</label>
+          <input type="email" id="startEmail" placeholder="you@example.com" required>
+        </div>
+        <div class="field">
+          <label for="startMsg">First message</label>
+          <textarea id="startMsg" placeholder="What would you like to talk about?" required></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block" id="startBtn">Start chat</button>
+      </form>
+    </div>
+
+    <div id="chatView" style="display:none;">
+      <div class="chat-shell">
+        <div class="chat-head">
+          <img src="assets/vynixS.png" alt="Vynix icon">
+          <div class="title">Vynix</div>
+          <div class="status">Online</div>
+        </div>
+        <div class="chat-body" id="chatBody">
+          <div class="empty-chat">Loading conversation…</div>
+        </div>
+        <div class="chat-input-row">
+          <input type="file" id="imageInput" accept="image/*" style="display:none;">
+          <button type="button" class="icon-btn" id="attachBtn" title="Send an image">📷</button>
+          <input type="text" id="messageInput" placeholder="Type a message…">
+          <button type="button" class="send-btn" id="sendBtn" title="Send">➤</button>
+        </div>
+      </div>
+      <p style="text-align:center;color:var(--slate-dim);font-family:var(--font-mono);font-size:0.72rem;margin-top:14px;">
+        This chat is tied to this browser. Use the same device/browser to keep the thread.
+      </p>
+    </div>
+
+  </div>
+</main>
+
+<footer>
+  <div class="foot-inner">
+    <div class="brand"><img src="assets/vynixS.png" alt="Vynix icon"></div>
+    <p>© 2026 VYNIX — WORLDS · CODE · FRAMES</p>
+  </div>
+</footer>
+
+<script type="module">
+  import {
+    ensureAnonymousSignIn, startConversation, listenMessages, sendMessage, uploadChatImage
+  } from "./app.js";
+
+  const STORAGE_KEY = "vynix_conversation_id";
+  const NAME_KEY = "vynix_client_name";
+
+  const startView = document.getElementById("startView");
+  const chatView = document.getElementById("chatView");
+  const startForm = document.getElementById("startForm");
+  const startBtn = document.getElementById("startBtn");
+  const startMessage = document.getElementById("startMessage");
+  const chatBody = document.getElementById("chatBody");
+  const messageInput = document.getElementById("messageInput");
+  const sendBtn = document.getElementById("sendBtn");
+  const attachBtn = document.getElementById("attachBtn");
+  const imageInput = document.getElementById("imageInput");
+
+  let conversationId = localStorage.getItem(STORAGE_KEY);
+  let clientName = localStorage.getItem(NAME_KEY) || "You";
+  let clientUid = null;
+  let unsubMessages = null;
+
+  function escapeHtml(str) {
+    const d = document.createElement("div");
+    d.textContent = str || "";
+    return d.innerHTML;
+  }
+
+  function renderMessages(messages) {
+    if (!messages.length) {
+      chatBody.innerHTML = `<div class="empty-chat">Say hi to get things started.</div>`;
+      return;
+    }
+    chatBody.innerHTML = messages.map(m => {
+      const isClient = m.senderType === "client";
+      const label = isClient ? "You" : (m.senderLabel || "Vynix");
+      const body = m.type === "image" && m.imageUrl
+        ? `<img src="${escapeHtml(m.imageUrl)}" alt="Shared image">`
+        : escapeHtml(m.text);
+      return `<div class="bubble ${isClient ? "client" : "leader"}">
+        <div class="sender">${escapeHtml(label)}</div>
+        ${body}
+      </div>`;
+    }).join("");
+    chatBody.scrollTop = chatBody.scrollHeight;
+  }
+
+  function openChat() {
+    startView.style.display = "none";
+    chatView.style.display = "block";
+    if (unsubMessages) unsubMessages();
+    unsubMessages = listenMessages(conversationId, renderMessages, (err) => {
+      chatBody.innerHTML = `<div class="empty-chat">Couldn't load messages: ${err.code || err.message}</div>`;
+    });
+  }
+
+  (async function init() {
+    try {
+      const user = await ensureAnonymousSignIn();
+      clientUid = user.uid;
+      if (conversationId) openChat();
+    } catch (err) {
+      startMessage.textContent = "Couldn't connect: " + (err.message || err);
+      startMessage.className = "form-message show error";
+    }
+  })();
+
+  startForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const name = document.getElementById("startName").value.trim();
+    const email = document.getElementById("startEmail").value.trim();
+    const msg = document.getElementById("startMsg").value.trim();
+    if (!name || !email || !msg) return;
+
+    startBtn.disabled = true;
+    startBtn.innerHTML = '<span class="spinner"></span> Starting…';
+
+    try {
+      if (!clientUid) {
+        const user = await ensureAnonymousSignIn();
+        clientUid = user.uid;
+      }
+      conversationId = await startConversation(clientUid, name, email, msg);
+      localStorage.setItem(STORAGE_KEY, conversationId);
+      localStorage.setItem(NAME_KEY, name);
+      clientName = name;
+      openChat();
+    } catch (err) {
+      startMessage.textContent = err.message || "Couldn't start the chat — try again.";
+      startMessage.className = "form-message show error";
+      startBtn.disabled = false;
+      startBtn.textContent = "Start chat";
+    }
+  });
+
+  async function sendText() {
+    const text = messageInput.value.trim();
+    if (!text || !conversationId || !clientUid) return;
+    messageInput.value = "";
+    try {
+      await sendMessage(conversationId, clientUid, "client", clientName, { text });
+    } catch (err) {
+      alert("Couldn't send that message: " + (err.message || err));
+    }
+  }
+
+  sendBtn.addEventListener("click", sendText);
+  messageInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") sendText();
+  });
+
+  attachBtn.addEventListener("click", () => imageInput.click());
+  imageInput.addEventListener("change", async () => {
+    const file = imageInput.files[0];
+    if (!file || !conversationId || !clientUid) return;
+    attachBtn.textContent = "…";
+    attachBtn.disabled = true;
+    try {
+      const url = await uploadChatImage(conversationId, file);
+      await sendMessage(conversationId, clientUid, "client", clientName, { imageUrl: url });
+    } catch (err) {
+      alert("Couldn't send that image: " + (err.message || err));
+    } finally {
+      attachBtn.textContent = "📷";
+      attachBtn.disabled = false;
+      imageInput.value = "";
+    }
+  });
+</script>
+</body>
+</html>

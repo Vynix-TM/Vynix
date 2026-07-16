@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vynix — Worlds, Code, Frames</title>
+<link rel="icon" href="assets/vynixS.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header>
+  <nav>
+    <div class="brand">
+      <img src="assets/vynixS.png" alt="Vynix icon">
+      <span>VYNIX</span>
+    </div>
+    <div class="navlinks">
+      <a href="#crafts">Crafts</a>
+      <a href="services.html">Web services</a>
+      <a href="#leaders">Leadership</a>
+      <a href="signin.html" id="navAccountLink">Sign in</a>
+      <a href="join.html" class="nav-cta">Join the team</a>
+    </div>
+  </nav>
+</header>
+
+<main>
+  <section class="hero">
+    <div class="wrap">
+      <div class="eyebrow">VYNIX COLLECTIVE</div>
+      <img class="lockup" src="assets/vynix_hero.png" alt="Vynix logo and wordmark">
+      <h1>We build <em>worlds</em>, write the code behind them, and capture the frames in between.</h1>
+      <p class="sub">A collective working across game development, programming and sites, and photography — three crafts, one signal.</p>
+      <div class="cta-row">
+        <a href="join.html" class="btn btn-primary">Join the team</a>
+        <a href="#crafts" class="btn btn-ghost">See what we do</a>
+      </div>
+    </div>
+  </section>
+
+  <section id="crafts">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="eyebrow">WHAT WE DO</div>
+        <h2>Three crafts, three languages</h2>
+        <p>Every discipline gets its own voice — because a game, a codebase, and a photograph are never built the same way.</p>
+      </div>
+
+      <div class="pillars">
+        <div class="pillar game">
+          <span class="corner tl"></span><span class="corner br"></span>
+          <div class="tag">// game development</div>
+          <h3>Worlds you can step into</h3>
+          <p>Designing and building games from concept to playable build — mechanics, levels, and the systems that hold them together.</p>
+        </div>
+
+        <div class="pillar code">
+          <div class="termbar"><span></span><span></span><span></span></div>
+          <div class="tag">$ programming &amp; sites</div>
+          <h3>Sites and software, shipped</h3>
+          <p>Building programming projects and websites end to end — from the first commit to something live and working.<span class="cursor"></span></p>
+        </div>
+
+        <div class="pillar photo">
+          <div class="viewfinder">
+            <span class="crop tl"></span><span class="crop tr"></span>
+            <span class="crop bl"></span><span class="crop br"></span>
+          </div>
+          <div class="tag">◎ photography</div>
+          <h3>Frames worth keeping</h3>
+          <p>Making photos that capture the team, the work, and the moments around it — a visual record of everything else we build.</p>
+          <div class="exif">f/1.8 · 1/200 · ISO 400</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="leaders">
+    <div class="wrap">
+      <div class="section-head">
+        <div class="eyebrow">LEADERSHIP</div>
+        <h2>Who steers Vynix</h2>
+      </div>
+
+      <div class="leaders">
+        <div class="leader-card strong">
+          <div class="badge-hex">LM</div>
+          <div class="role">Leader</div>
+          <div class="name">Leo MH</div>
+          <div class="desc">Sets the direction for Vynix across every craft the team works in.</div>
+        </div>
+
+        <div class="leader-card">
+          <div class="badge-hex">H</div>
+          <div class="role">Leader</div>
+          <div class="name">Herko</div>
+          <div class="desc">Leads alongside Leo MH, shaping how Vynix's work comes together.</div>
+        </div>
+
+        <div class="leader-card">
+          <div class="badge-hex">W</div>
+          <div class="role">Leader · Mastermind</div>
+          <div class="name">Whisky</div>
+          <div class="desc">The mastermind behind Vynix — the one who brings the ideas that shape what the team builds next.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="join-cta">
+    <div class="wrap" style="text-align:center;">
+      <div class="card" style="max-width:560px;margin:0 auto;padding:48px 36px;">
+        <div class="eyebrow">WANT IN?</div>
+        <h2 style="font-family:var(--font-display);font-size:1.5rem;margin-bottom:14px;">Bring your craft to Vynix</h2>
+        <p style="color:var(--slate);margin-bottom:28px;">Games dev, photo editing, or building sites — tell us what you do.</p>
+        <a href="join.html" class="btn btn-primary">Apply to join</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer id="contact">
+  <div class="foot-inner">
+    <div class="brand">
+      <img src="assets/vynixS.png" alt="Vynix icon">
+    </div>
+    <div class="foot-links">
+      <a href="services.html">Web services</a>
+      <a href="join.html">Join</a>
+      <a href="signin.html">Account</a>
+      <a href="leader.html">Leader access</a>
+    </div>
+    <p>© 2026 VYNIX — WORLDS · CODE · FRAMES</p>
+  </div>
+</footer>
+
+<script type="module">
+  import { watchAuth } from "./app.js";
+  const link = document.getElementById("navAccountLink");
+  watchAuth((user) => {
+    if (user) {
+      link.textContent = "My account";
+      link.href = "signin.html";
+    } else {
+      link.textContent = "Sign in";
+      link.href = "signin.html";
+    }
+  });
+</script>
+</body>
+</html>
